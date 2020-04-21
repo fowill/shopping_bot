@@ -15,7 +15,7 @@ class DefaultConfig:
     APP_PASSWORD = os.environ.get("MicrosoftAppPassword", "")
 
     #LUIS
-    LUIS_APP_ID = "48faffb1-babb-4810-ab86-587150ff3ce1"
+    LUIS_APP_ID = "d97e102a-39b6-465a-aff1-09d87ab3066e"
     LUIS_API_KEY = "7dd9b99dbb6b40d795a932bcf10b2562"
     # LUIS endpoint host name, ie "westus.api.cognitive.microsoft.com"
     LUIS_API_HOST_NAME = "westus.api.cognitive.microsoft.com"

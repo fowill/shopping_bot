@@ -21,11 +21,11 @@ from botbuilder.core.integration import aiohttp_error_middleware
 from botbuilder.schema import Activity
 
 from config import DefaultConfig
-from dialogs import MainDialog, BookingDialog
+from dialogs import MainDialog, RecommendDialog
 from bots import DialogAndWelcomeBot
 
 from adapter_with_error_handler import AdapterWithErrorHandler
-from flight_booking_recognizer import FlightBookingRecognizer
+from recognizer import ShoppingRecognizer
 
 CONFIG = DefaultConfig()
 
@@ -43,9 +43,9 @@ CONVERSATION_STATE = ConversationState(MEMORY)
 ADAPTER = AdapterWithErrorHandler(SETTINGS, CONVERSATION_STATE)
 
 # Create dialogs and Bot
-RECOGNIZER = FlightBookingRecognizer(CONFIG)
-BOOKING_DIALOG = BookingDialog()
-DIALOG = MainDialog(RECOGNIZER, BOOKING_DIALOG)
+RECOGNIZER = ShoppingRecognizer(CONFIG)
+RECOMMEND_DIALOG = RecommendDialog()
+DIALOG = MainDialog(RECOGNIZER, RECOMMEND_DIALOG)
 BOT = DialogAndWelcomeBot(CONVERSATION_STATE, USER_STATE, DIALOG)
 
 
