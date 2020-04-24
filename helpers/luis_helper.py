@@ -5,7 +5,7 @@ from typing import Dict
 from botbuilder.ai.luis import LuisRecognizer
 from botbuilder.core import IntentScore, TopIntent, TurnContext
 
-from product_details import 
+from product_details import ProductDetails
 
 
 class Intent(Enum):
@@ -52,6 +52,7 @@ class LuisHelper:
             )
 
             if intent == Intent.ASK.value:
+                print("=")
                 result = ProductDetails()
 
                 # We need to get the result from the LUIS JSON which at every level returns an array.
@@ -67,7 +68,7 @@ class LuisHelper:
                         result.unsupported_things.append(
                             to_entities[0]["text"].capitalize()
                         )
-
+                """
                 # We need to get the result from the LUIS JSON which at every level returns an array.
                 cost_entities = recognizer_result.entities.get("$instance", {}).get(
                     "cost", []
@@ -81,7 +82,8 @@ class LuisHelper:
                         result.unsupported_things.append(
                             to_entities[0]["text"].capitalize()
                         )
-
+                """
+                result.cost = turn_context.activity.text
                  # We need to get the result from the LUIS JSON which at every level returns an array.
                 brand_entities = recognizer_result.entities.get("$instance", {}).get(
                     "brand", []

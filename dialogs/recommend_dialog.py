@@ -16,7 +16,6 @@ class RecommendDialog(CancelAndHelpDialog):
 
         self.add_dialog(TextPrompt(TextPrompt.__name__))
         self.add_dialog(ConfirmPrompt(ConfirmPrompt.__name__))
-        self.add_dialog(DateResolverDialog(DateResolverDialog.__name__))
         self.add_dialog(
             WaterfallDialog(
                 WaterfallDialog.__name__,
@@ -38,7 +37,7 @@ class RecommendDialog(CancelAndHelpDialog):
     ) -> DialogTurnResult:
         product_details = step_context.options
 
-        if product_details.destination is None:
+        if product_details.use is None:
             message_text = "您购买这台笔记本是用于什么用途呢？"
             prompt_message = MessageFactory.text(
                 message_text, message_text, InputHints.expecting_input
@@ -46,7 +45,7 @@ class RecommendDialog(CancelAndHelpDialog):
             return await step_context.prompt(
                 TextPrompt.__name__, PromptOptions(prompt=prompt_message)
             )
-        return await step_context.next(product_details.destination)
+        return await step_context.next(product_details.use)
 
     async def cost_step(
         self, step_context: WaterfallStepContext
@@ -56,14 +55,14 @@ class RecommendDialog(CancelAndHelpDialog):
         # Capture the response to the previous step's prompt
         product_details.use = step_context.result
 
-        if product_details.cost is None:
-            message_text = "您购买这台笔记本的预算大约是多少元呢？"
-            prompt_message = MessageFactory.text(
-                message_text, message_text, InputHints.expecting_input
-            )
-            return await step_context.prompt(
-                TextPrompt.__name__, PromptOptions(prompt=prompt_message)
-            )
+        #if product_details.cost is None:
+        message_text = "您购买这台笔记本的预算大约是多少元呢？"
+        prompt_message = MessageFactory.text(
+            message_text, message_text, InputHints.expecting_input
+        )
+        return await step_context.prompt(
+            TextPrompt.__name__, PromptOptions(prompt=prompt_message)
+        )
         return await step_context.next(product_details.cost)
 
     async def brand_step(
@@ -116,6 +115,7 @@ class RecommendDialog(CancelAndHelpDialog):
         product_details.looking = step_context.result
 
         message_text = (
+            f"confirm_step"
             f"请确认：您购买电脑是为了 { product_details.use } 用途"
             f"您的预算为：{ product_details.cost }"
             f"您的品牌倾向为：{ product_details.brand}."
