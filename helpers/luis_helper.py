@@ -6,13 +6,14 @@ from botbuilder.ai.luis import LuisRecognizer
 from botbuilder.core import IntentScore, TopIntent, TurnContext
 
 from product_details import ProductDetails
-
+from .use_helper import use_cal
 
 class Intent(Enum):
     ASK = "Ask"
     CANCEL = "Cancel"
     GET_WEATHER = "GetWeather"
     NONE_INTENT = "NoneIntent"
+
 
 
 def top_intent(intents: Dict[Intent, dict]) -> TopIntent:
@@ -51,6 +52,7 @@ class LuisHelper:
                 else None
             )
 
+
             if intent == Intent.ASK.value:
                 print("=")
                 result = ProductDetails()
@@ -68,7 +70,8 @@ class LuisHelper:
                         result.unsupported_things.append(
                             to_entities[0]["text"].capitalize()
                         )
-                """
+
+
                 # We need to get the result from the LUIS JSON which at every level returns an array.
                 cost_entities = recognizer_result.entities.get("$instance", {}).get(
                     "cost", []
@@ -82,8 +85,7 @@ class LuisHelper:
                         result.unsupported_things.append(
                             to_entities[0]["text"].capitalize()
                         )
-                """
-                result.cost = turn_context.activity.text
+
                  # We need to get the result from the LUIS JSON which at every level returns an array.
                 brand_entities = recognizer_result.entities.get("$instance", {}).get(
                     "brand", []
