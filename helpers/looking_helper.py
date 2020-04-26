@@ -9,7 +9,8 @@ def looking_cal(text1):
 
 	client = AipNlp(APP_ID, API_KEY, SECRET_KEY)
 
-	looking_ls = ["轻薄优雅","商务办公大气","炫酷帅","精致高级"]
+	looking_ls = ["轻薄携带小巧精致","商务办公大气公司出差低调沉稳","炫酷帅RGB灯霸气威武"]
+	name_ls = ["looking-elegent","looking-business","looking-cool"]
 
 
 	""" 调用短文本相似度 """

@@ -9,8 +9,8 @@ def use_cal(text1):
 
 	client = AipNlp(APP_ID, API_KEY, SECRET_KEY)
 
-	use_ls = ["看电影听音乐追剧看番","办公出差商务表格","游戏电竞单机网游","平面设计PS视频剪辑"]
-	name_ls = ["影音娱乐","商务差旅","游戏电竞","创意设计"]
+	use_ls = ["看电影听音乐追剧看番","办公出差商务表格","游戏电竞单机网游","平面设计PS视频剪辑","日常全能随便都行"]
+	name_ls = ["use-media","use-business","use-gaming","use-creator","use-all"]
 
 
 	""" 调用短文本相似度 """

@@ -112,7 +112,6 @@ class MainDialog(ComponentDialog):
             msg_txt = (
                 f"请确认：您购买电脑是为了 { result.use } 用途"
                 f"您的预算为：{ result.cost }"
-                f"您的品牌倾向为：{ result.brand }."
                 f"您的外观需求为：{ result.looking }"
             )
 
