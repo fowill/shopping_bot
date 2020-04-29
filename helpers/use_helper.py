@@ -14,13 +14,13 @@ def use_cal(text1):
 
 
 	""" 调用短文本相似度 """
-	best_num = 0
-	best_score = 0
+	score_ls = []
+	score_dict = {}
 	for i in range(len(use_ls)):
-		result = client.simnet(text1, use_ls[i])
 		time.sleep(0.5)
-		if result["score"] > best_score:
-			best_score = result["score"]
-			best_num = i
+		result = client.simnet(text1, use_ls[i])["score"]
+		score_ls.append(result)
+		score_dict[name_ls[i]] = score_ls[i]
 
-	return name_ls[best_num]
+
+	return score_dict

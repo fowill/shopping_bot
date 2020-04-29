@@ -110,9 +110,10 @@ class MainDialog(ComponentDialog):
             # time_property = Timex(result.travel_date)
             # travel_date_msg = time_property.to_natural_language(datetime.now())
             msg_txt = (
-                f"请确认：您购买电脑是为了 { result.use } 用途"
-                f"您的预算为：{ result.cost }"
-                f"您的外观需求为：{ result.looking }"
+                #f"请确认：您购买电脑是为了 { result.use } 用途"
+                #f"您的预算为：{ result.cost }"
+                #f"您的外观需求为：{ result.looking }"
+                f"如何？"
             )
 
             message = MessageFactory.text(msg_txt, msg_txt, InputHints.ignoring_input)
