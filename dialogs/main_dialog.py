@@ -12,29 +12,38 @@ from botbuilder.core import MessageFactory, TurnContext
 from botbuilder.schema import InputHints
 
 from product_details import ProductDetails
+from main_details import MainDetails
 from recognizer import ShoppingRecognizer
 from helpers.luis_helper import LuisHelper, Intent
 from .recommend_dialog import RecommendDialog
+from .adjust_dialog import AdjustDialog
+from helpers.ok_helper import is_ok
+
+
 
 
 class MainDialog(ComponentDialog):
     def __init__(
-        self, luis_recognizer: ShoppingRecognizer, recommend_dialog: RecommendDialog
+        self, luis_recognizer: ShoppingRecognizer, recommend_dialog: RecommendDialog, adjust_dialog: AdjustDialog
     ):
         super(MainDialog, self).__init__(MainDialog.__name__)
 
         self._luis_recognizer = luis_recognizer
         self._recommend_dialog_id = recommend_dialog.id
+        self._adjust_dialog_id = adjust_dialog.id
+
 
         self.add_dialog(TextPrompt(TextPrompt.__name__))
         self.add_dialog(recommend_dialog)
+        self.add_dialog(adjust_dialog)
         self.add_dialog(
             WaterfallDialog(
-                "WFDialog", [self.intro_step, self.act_step, self.final_step]
+                "WFDialog", [self.intro_step, self.act_step, self.adjust_step, self.final_step]
             )
         )
 
         self.initial_dialog_id = "WFDialog"
+        self.ok = None
 
     async def intro_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         if not self._luis_recognizer.is_configured:
@@ -59,6 +68,7 @@ class MainDialog(ComponentDialog):
         return await step_context.prompt(
             TextPrompt.__name__, PromptOptions(prompt=prompt_message)
         )
+
 
     async def act_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         if not self._luis_recognizer.is_configured:
@@ -98,27 +108,50 @@ class MainDialog(ComponentDialog):
 
         return await step_context.next(None)
 
+    async def adjust_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
+        # If the child dialog ("BookingDialog") was cancelled or the user failed to confirm,
+        # the Result here will be null.
+        if not self._luis_recognizer.is_configured:
+            # LUIS is not configured, we just run the BookingDialog path with an empty BookingDetailsInstance.
+            return await step_context.begin_dialog(
+                self._recommend_dialog_id, ProductDetails()
+            )
+
+
+        if step_context.result is not None:
+            result = step_context.result
+            msg_txt = (
+                f"您有什么其他意见吗？"
+            )
+
+            message = MessageFactory.text(msg_txt, msg_txt, InputHints.expecting_input)
+            await step_context.prompt(
+                TextPrompt.__name__, PromptOptions(prompt=message)
+            )
+
+        return await step_context.next(None)
+
+
     async def final_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         # If the child dialog ("BookingDialog") was cancelled or the user failed to confirm,
         # the Result here will be null.
-        if step_context.result is not None:
-            result = step_context.result
-
-            # Now we have all the booking details call the booking service.
-
-            # If the call to the booking service was successful tell the user.
-            # time_property = Timex(result.travel_date)
-            # travel_date_msg = time_property.to_natural_language(datetime.now())
-            msg_txt = (
-                #f"请确认：您购买电脑是为了 { result.use } 用途"
-                #f"您的预算为：{ result.cost }"
-                #f"您的外观需求为：{ result.looking }"
-                f"如何？"
+        if not self._luis_recognizer.is_configured:
+            # LUIS is not configured, we just run the BookingDialog path with an empty BookingDetailsInstance.
+            return await step_context.begin_dialog(
+                self._recommend_dialog_id, ProductDetails()
             )
 
-            message = MessageFactory.text(msg_txt, msg_txt, InputHints.ignoring_input)
-            await step_context.context.send_activity(message)
+        #details = step_context.result
+        self.ok = is_ok(step_context.result)
 
-        prompt_message = "我还能帮到什么吗？"
-        return await step_context.replace_dialog(self.id, prompt_message)
+        if self.ok:
+            prompt_message = "好的，我还能帮到什么吗？"
+            return await step_context.replace_dialog(self.id, prompt_message)
+        elif self.ok != None:
+            with open('/Users/fowillwly/Dev/shopping_bot/save/log.txt','a+') as f:
+                product_details = step_context.result
+                f.write(str(product_details))
+
+            await step_context.begin_dialog(self._adjust_dialog_id)
+            return await step_context.replace_dialog(self.id, prompt_message)
 

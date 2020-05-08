@@ -21,11 +21,13 @@ from botbuilder.core.integration import aiohttp_error_middleware
 from botbuilder.schema import Activity
 
 from config import DefaultConfig
-from dialogs import MainDialog, RecommendDialog
+from dialogs import MainDialog, RecommendDialog, AdjustDialog
 from bots import DialogAndWelcomeBot
 
 from adapter_with_error_handler import AdapterWithErrorHandler
 from recognizer import ShoppingRecognizer
+
+from main_details import MainDetails
 
 CONFIG = DefaultConfig()
 
@@ -45,7 +47,9 @@ ADAPTER = AdapterWithErrorHandler(SETTINGS, CONVERSATION_STATE)
 # Create dialogs and Bot
 RECOGNIZER = ShoppingRecognizer(CONFIG)
 RECOMMEND_DIALOG = RecommendDialog()
-DIALOG = MainDialog(RECOGNIZER, RECOMMEND_DIALOG)
+ADJUST_DIALOG = AdjustDialog()
+
+DIALOG = MainDialog(RECOGNIZER, RECOMMEND_DIALOG, ADJUST_DIALOG)
 BOT = DialogAndWelcomeBot(CONVERSATION_STATE, USER_STATE, DIALOG)
 
 

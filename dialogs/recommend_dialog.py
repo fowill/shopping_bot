@@ -5,12 +5,14 @@ from datatypes_date_time.timex import Timex
 
 from botbuilder.dialogs import WaterfallDialog, WaterfallStepContext, DialogTurnResult
 from botbuilder.dialogs.prompts import ConfirmPrompt, TextPrompt, PromptOptions
-from botbuilder.core import MessageFactory
+from botbuilder.core import MessageFactory, TurnContext
 from botbuilder.schema import InputHints, Attachment
 from .cancel_and_help_dialog import CancelAndHelpDialog
 from helpers.use_helper import use_cal
 from helpers.looking_helper import looking_cal
 from helpers.cost_helper import cost_cal
+from helpers.ok_helper import is_ok
+
 
 from recommend.recommend import recommend
 
@@ -111,9 +113,10 @@ class RecommendDialog(CancelAndHelpDialog):
             f"紧张计算中……"
         )
         time.sleep(1)
-        prompt_message = MessageFactory.text(
-            message_text, message_text, InputHints.expecting_input
+        calculating_message = MessageFactory.text(
+            message_text, message_text, InputHints.ignoring_input
         )
+        await step_context.context.send_activity(calculating_message)
 
         return await step_context.next(product_details.looking)
 
@@ -136,11 +139,28 @@ class RecommendDialog(CancelAndHelpDialog):
 
             message_text = str(recommend_result)
             prompt_message = MessageFactory.text(
-                message_text, message_text, InputHints.expecting_input
+                message_text, message_text, InputHints.ignoring_input
             )    
+            await step_context.context.send_activity(prompt_message)
+            '''
+            ask_message = MessageFactory.text(
+                '您觉得这一款怎么样？', '您觉得这一款怎么样？', InputHints.expecting_input
+            )   
             await step_context.prompt(
-                TextPrompt.__name__, PromptOptions(prompt=prompt_message)
-            )        
+                TextPrompt.__name__,PromptOptions(prompt=ask_message)
+            )
+
+            turn_context = TurnContext()
+            await turn_context.send_activity("Welcome!")
+            response = turn_context.activity.text
+            print(response)
+            
+            '''
+            #await step_context.prompt(
+                #TextPrompt.__name__, PromptOptions(prompt=prompt_message)
+            #)  
+
+
             return await step_context.end_dialog(product_details)
         return await step_context.end_dialog()
 
