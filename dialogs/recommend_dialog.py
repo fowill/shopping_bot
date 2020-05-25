@@ -142,24 +142,6 @@ class RecommendDialog(CancelAndHelpDialog):
                 message_text, message_text, InputHints.ignoring_input
             )    
             await step_context.context.send_activity(prompt_message)
-            '''
-            ask_message = MessageFactory.text(
-                '您觉得这一款怎么样？', '您觉得这一款怎么样？', InputHints.expecting_input
-            )   
-            await step_context.prompt(
-                TextPrompt.__name__,PromptOptions(prompt=ask_message)
-            )
-
-            turn_context = TurnContext()
-            await turn_context.send_activity("Welcome!")
-            response = turn_context.activity.text
-            print(response)
-            
-            '''
-            #await step_context.prompt(
-                #TextPrompt.__name__, PromptOptions(prompt=prompt_message)
-            #)  
-
 
             return await step_context.end_dialog(product_details)
         return await step_context.end_dialog()

@@ -17,6 +17,7 @@ from helpers.dialog_helper import DialogHelper
 
 from .dialog_bot import DialogBot
 
+from product_details import ProductDetails
 
 class DialogAndWelcomeBot(DialogBot):
     def __init__(
