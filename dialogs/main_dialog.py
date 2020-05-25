@@ -138,10 +138,6 @@ class MainDialog(ComponentDialog):
 
 
         if step_context.context is not None:
-            result = step_context.context
-            print('result is:'+str(result))
-
-
             msg_txt = (
                 f"您有什么其他意见吗？"
             )
@@ -153,11 +149,11 @@ class MainDialog(ComponentDialog):
 
     async def final_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
 
-        print(step_context.context)
-        details = step_context.result
-        details.ok = is_ok(step_context.result)
+        print(step_context.context.activity)
+        details = step_context.context.activity.text
+        ok = is_ok(details)
 
-        if details.ok:
+        if ok:
             prompt_message = "好的，我还能帮到什么吗？"
             return await step_context.replace_dialog(self.id, prompt_message)
         else:
