@@ -143,6 +143,14 @@ class RecommendDialog(CancelAndHelpDialog):
             )    
             await step_context.context.send_activity(prompt_message)
 
+            pro_dict = {}
+            pro_dict['use'] = product_details.use
+            pro_dict['looking'] = product_details.looking
+            pro_dict['cost'] = product_details.cost
+
+            with open('/Users/fowillwly/Dev/shopping_bot/save/log.txt','a+') as f:
+                f.write(str(pro_dict))
+
             return await step_context.end_dialog(product_details)
         return await step_context.end_dialog()
 

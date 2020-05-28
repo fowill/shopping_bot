@@ -6,13 +6,22 @@ from botbuilder.dialogs import (
 )
 from botbuilder.dialogs.prompts import TextPrompt, PromptOptions
 from botbuilder.core import MessageFactory, TurnContext
-from botbuilder.schema import InputHints
+from botbuilder.schema import InputHints, Attachment
 
 from product_details import ProductDetails
 from recognizer import ShoppingRecognizer
 from helpers.luis_helper import LuisHelper, Intent
+from helpers.pointExtract_helper import pointExtract 
 
 from .cancel_and_help_dialog import CancelAndHelpDialog
+
+from recommend.adjust_recommend import adjust
+
+import os
+import json
+
+
+
 
 class AdjustDialog(CancelAndHelpDialog):
     def __init__(self, dialog_id: str = None):
@@ -28,65 +37,53 @@ class AdjustDialog(CancelAndHelpDialog):
         self.initial_dialog_id = "WFDialog"
 
     async def ask_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        if not self._luis_recognizer.is_configured:
-            await step_context.context.send_activity(
-                MessageFactory.text(
-                    "NOTE: LUIS is not configured. To enable all capabilities, add 'LuisAppId', 'LuisAPIKey' and "
-                    "'LuisAPIHostName' to the appsettings.json file.",
-                    input_hint=InputHints.ignoring_input,
-                )
-            )
 
-            return await step_context.next(None)
-
-        adjust_details = step_context.options
-
-        message_text = (
-            str(step_context.options)
-            if step_context.options
-            else "请说调整建议"
-        )
+        message_text = ("请说调整建议")
 
         prompt_message = MessageFactory.text(
             message_text, message_text, InputHints.expecting_input
         )
 
-        await step_context.prompt(
+        return await step_context.prompt(
             TextPrompt.__name__, PromptOptions(prompt=prompt_message)
         )
 
-        return await step_context.next(adjust_details.adjust)
 
     async def act_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
 
-        # Capture the response to the previous step's prompt
-        adjust_details.adjust = use_cal(step_context.result)
+        details = step_context.context.activity.text
+        score_dict = pointExtract(details)
+        price = {'low':1,'high':20000}
+        recommend_id, recommend_result= adjust(price,score_dict)
 
-        '''
-        status_message_text = (
-            "intent: "+intent+"  luis_result: "+luis_result
-            )
-        status_message = MessageFactory.text(
-            status_message_text, status_message_text, InputHints.ignoring_input
+        welcome_card = self.create_adaptive_card_attachment(recommend_id)
+        response = MessageFactory.attachment(welcome_card)
+        await step_context.context.send_activity(response)
+
+        message_text = str(recommend_result)
+        prompt_message = MessageFactory.text(
+            message_text, message_text, InputHints.ignoring_input
+        )    
+        await step_context.context.send_activity(prompt_message)
+
+        return await step_context.end_dialog()
+
+
+        # Load attachment from file.
+    def create_adaptive_card_attachment(self,id):
+        relative_path = os.path.abspath(os.path.dirname(__file__))
+        path = os.path.join(relative_path, "../json/test.json")
+        img_path = '/Users/fowillwly/Dev/shopping_bot/sources/img/'+str(id+1)+'.png'
+        print(img_path)
+        with open(path) as in_file:
+            card = json.load(in_file)
+            card['body'][0]['url'] = img_path
+        with open('/Users/fowillwly/Dev/shopping_bot/sources/test.txt','w+') as f:
+            f.write(str(card))
+        print(card)
+        return Attachment(
+            content_type="application/vnd.microsoft.card.adaptive", content=card
         )
-        
-        await step_context.context.send_activity(status_message)
-        '''
-        #if intent == Intent.ASK.value and luis_result:
-        if intent == Intent.ASK.value and luis_result:
-            # Run the BookingDialog giving it whatever details we have from the LUIS call.
-            return await step_context.begin_dialog(self._recommend_dialog_id, luis_result)
-
-        else:
-            didnt_understand_text = (
-                "有一说一，这个我搞不懂。"+str(intent)+Intent.ASK.value+str(luis_result)
-            )
-            didnt_understand_message = MessageFactory.text(
-                didnt_understand_text, didnt_understand_text, InputHints.ignoring_input
-            )
-            await step_context.context.send_activity(didnt_understand_message)
-
-        return await step_context.next(None)
 
 
 

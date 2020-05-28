@@ -1,7 +1,7 @@
 import pandas as pd 
 import numpy as np 
 
-def adjust(use,looking,price):
+def adjust(price,score_dict):
 	path = '/Users/fowillwly/Dev/shopping_bot/sources/laptops.xlsx'
 
 	df = pd.read_excel(path)
@@ -20,10 +20,8 @@ def adjust(use,looking,price):
 	    if df.loc[i,'price']<price_low or df.loc[i,'price']>price_high:
 	        score = 0
 	    else:
-	        for key in list(use.keys()):
-	            score += use[key]*df.loc[i,key]
-	        for key in list(looking.keys()):
-	            score += looking[key]*df.loc[i,key]
+	        for key in list(score_dict.keys()):
+	            score += score_dict[key]*df.loc[i,key]
 	    score_ls.append(score)
 
 	index = 0

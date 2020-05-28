@@ -65,40 +65,25 @@ class MainDialog(ComponentDialog):
             )
 
             return await step_context.next(None)
-
+        '''
         message_text = (
             str(step_context.options)
             if step_context.options
             else "您好！有什么能帮到您的吗？"
         )
+        '''
+        message_text = (
+            "您好！有什么能帮到您的吗？"
+        )
+
         prompt_message = MessageFactory.text(
             message_text, message_text, InputHints.expecting_input
         )
 
-        await step_context.prompt(
-            TextPrompt.__name__, PromptOptions(prompt=prompt_message)
-        )
-
-        print(1)
-        #print(step_context.options)
-
-        testDetails = step_context.options
-        if testDetails.looking is None:
-            message_text = "testing!!!"
-            prompt_message = MessageFactory.text(
-                message_text, message_text, InputHints.expecting_input
-            )
-            return await step_context.prompt(
-                TextPrompt.__name__, PromptOptions(prompt=prompt_message)
-            )
-
-        message_text = "NoTesting!!!"
-        prompt_message = MessageFactory.text(
-            message_text, message_text, InputHints.expecting_input
-        )
         return await step_context.prompt(
             TextPrompt.__name__, PromptOptions(prompt=prompt_message)
         )
+
 
 
     async def act_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
@@ -137,6 +122,7 @@ class MainDialog(ComponentDialog):
             )
 
 
+
         if step_context.context is not None:
             msg_txt = (
                 f"您有什么其他意见吗？"
@@ -157,10 +143,9 @@ class MainDialog(ComponentDialog):
             prompt_message = "好的，我还能帮到什么吗？"
             return await step_context.replace_dialog(self.id, prompt_message)
         else:
-            with open('/Users/fowillwly/Dev/shopping_bot/save/log.txt','a+') as f:
-                product_details = step_context.result
-                f.write(str(product_details))
-
-            await step_context.begin_dialog(self._adjust_dialog_id)
-            return await step_context.replace_dialog(self.id, prompt_message)
+            #with open('/Users/fowillwly/Dev/shopping_bot/save/log.txt','a+') as f:
+                #product_details = step_context.result
+                #f.write(str(product_details))
+            return await step_context.begin_dialog(self._adjust_dialog_id)
+            #return await step_context.replace_dialog(self.id, prompt_message)
 

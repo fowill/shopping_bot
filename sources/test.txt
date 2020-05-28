@@ -1,1 +1,1 @@
-{'$schema': 'http://adaptivecards.io/schemas/adaptive-card.json', 'type': 'AdaptiveCard', 'version': '1.0', 'body': [{'type': 'Image', 'url': '/Users/fowillwly/Dev/shopping_bot/sources/img/1.png', 'size': 'stretch'}]}
+{'$schema': 'http://adaptivecards.io/schemas/adaptive-card.json', 'type': 'AdaptiveCard', 'version': '1.0', 'body': [{'type': 'Image', 'url': '/Users/fowillwly/Dev/shopping_bot/sources/img/3.png', 'size': 'stretch'}]}
