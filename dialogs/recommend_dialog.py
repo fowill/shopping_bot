@@ -149,7 +149,10 @@ class RecommendDialog(CancelAndHelpDialog):
             pro_dict['cost'] = product_details.cost
 
             with open('/Users/fowillwly/Dev/shopping_bot/save/log.txt','a+') as f:
-                f.write(str(pro_dict))
+                f.write(str(recommend_id))
+                f.write('\n')
+            with open('/Users/fowillwly/Dev/shopping_bot/save/priceLog.txt','w+') as f:
+                f.write(str(product_details.cost))
 
             return await step_context.end_dialog(product_details)
         return await step_context.end_dialog()
@@ -160,13 +163,13 @@ class RecommendDialog(CancelAndHelpDialog):
         relative_path = os.path.abspath(os.path.dirname(__file__))
         path = os.path.join(relative_path, "../json/test.json")
         img_path = '/Users/fowillwly/Dev/shopping_bot/sources/img/'+str(id+1)+'.png'
-        print(img_path)
+        #print(img_path)
         with open(path) as in_file:
             card = json.load(in_file)
             card['body'][0]['url'] = img_path
         with open('/Users/fowillwly/Dev/shopping_bot/sources/test.txt','w+') as f:
             f.write(str(card))
-        print(card)
+        #print(card)
         return Attachment(
             content_type="application/vnd.microsoft.card.adaptive", content=card
         )

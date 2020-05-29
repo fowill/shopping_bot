@@ -100,7 +100,7 @@ class MainDialog(ComponentDialog):
         )
 
         if intent == Intent.ASK.value and luis_result:
-            print('intent == Intent.ASK.value and luis_result')
+            #print('intent == Intent.ASK.value and luis_result')
             return await step_context.begin_dialog(self._recommend_dialog_id, options=ProductDetails())
 
         else:
@@ -125,7 +125,7 @@ class MainDialog(ComponentDialog):
 
         if step_context.context is not None:
             msg_txt = (
-                f"您有什么其他意见吗？"
+                f"您对这个推荐结果满意吗？"
             )
 
             message = MessageFactory.text(msg_txt, msg_txt, InputHints.expecting_input)
@@ -135,17 +135,19 @@ class MainDialog(ComponentDialog):
 
     async def final_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
 
-        print(step_context.context.activity)
+        #print(step_context.context.activity)
         details = step_context.context.activity.text
         ok = is_ok(details)
 
         if ok:
             prompt_message = "好的，我还能帮到什么吗？"
+            with open('/Users/fowillwly/Dev/shopping_bot/save/log.txt','w+') as f:
+                f.write('')
             return await step_context.replace_dialog(self.id, prompt_message)
         else:
-            #with open('/Users/fowillwly/Dev/shopping_bot/save/log.txt','a+') as f:
-                #product_details = step_context.result
-                #f.write(str(product_details))
-            return await step_context.begin_dialog(self._adjust_dialog_id)
-            #return await step_context.replace_dialog(self.id, prompt_message)
+            with open('/Users/fowillwly/Dev/shopping_bot/save/satisfied.txt','w+') as f:
+                is_satisfied = f.read()
+            if is_satisfied != 'Yes':
+                print(1)
+                return await step_context.begin_dialog(self._adjust_dialog_id)
 

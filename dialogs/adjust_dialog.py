@@ -20,6 +20,8 @@ from recommend.adjust_recommend import adjust
 import os
 import json
 
+from helpers.ok_helper import is_ok
+
 
 
 
@@ -30,7 +32,7 @@ class AdjustDialog(CancelAndHelpDialog):
         self.add_dialog(TextPrompt(TextPrompt.__name__))
         self.add_dialog(
             WaterfallDialog(
-                "WFDialog", [self.ask_step, self.act_step]
+                "WFDialog", [self.ask_step, self.act_step, self.final_step]
             )
         )
 
@@ -53,8 +55,8 @@ class AdjustDialog(CancelAndHelpDialog):
 
         details = step_context.context.activity.text
         score_dict = pointExtract(details)
-        price = {'low':1,'high':20000}
-        recommend_id, recommend_result= adjust(price,score_dict)
+        #price = {'low':1,'high':20000}
+        recommend_id, recommend_result= adjust(score_dict)
 
         welcome_card = self.create_adaptive_card_attachment(recommend_id)
         response = MessageFactory.attachment(welcome_card)
@@ -66,21 +68,41 @@ class AdjustDialog(CancelAndHelpDialog):
         )    
         await step_context.context.send_activity(prompt_message)
 
-        return await step_context.end_dialog()
+        #return await step_context.end_dialog()
+        msg_txt = (
+            f"您对这个推荐结果满意吗？"
+        )
 
+        message = MessageFactory.text(msg_txt, msg_txt, InputHints.expecting_input)
+        return await step_context.prompt(
+            TextPrompt.__name__, PromptOptions(prompt=message)
+        )
+
+    async def final_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
+        details = step_context.context.activity.text
+        ok = is_ok(details)
+
+        if ok:
+            with open('/Users/fowillwly/Dev/shopping_bot/save/satisfied.txt','w+') as f:
+                f.write('Yes')
+            return
+        else:
+            with open('/Users/fowillwly/Dev/shopping_bot/save/satisfied.txt','w+') as f:
+                f.write('No')
+            return
 
         # Load attachment from file.
     def create_adaptive_card_attachment(self,id):
         relative_path = os.path.abspath(os.path.dirname(__file__))
         path = os.path.join(relative_path, "../json/test.json")
         img_path = '/Users/fowillwly/Dev/shopping_bot/sources/img/'+str(id+1)+'.png'
-        print(img_path)
+        #print(img_path)
         with open(path) as in_file:
             card = json.load(in_file)
             card['body'][0]['url'] = img_path
         with open('/Users/fowillwly/Dev/shopping_bot/sources/test.txt','w+') as f:
             f.write(str(card))
-        print(card)
+        #print(card)
         return Attachment(
             content_type="application/vnd.microsoft.card.adaptive", content=card
         )
