@@ -19,6 +19,8 @@ from .recommend_dialog import RecommendDialog
 from .adjust_dialog import AdjustDialog
 from helpers.ok_helper import is_ok
 
+import os
+
 
 
 
@@ -140,12 +142,13 @@ class MainDialog(ComponentDialog):
         ok = is_ok(details)
 
         if ok:
-            prompt_message = "好的，我还能帮到什么吗？"
-            with open('/Users/fowillwly/Dev/shopping_bot/save/log.txt','w+') as f:
+            prompt_message = "好的，我还能帮到什么吗？"    
+            with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/log.txt','w+') as f:
                 f.write('')
             return await step_context.replace_dialog(self.id, prompt_message)
         else:
-            with open('/Users/fowillwly/Dev/shopping_bot/save/satisfied.txt','w+') as f:
+            #with open('/Users/fowillwly/Dev/shopping_bot/save/satisfied.txt','w+') as f:
+            with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/satisfied.txt','w+') as f:
                 is_satisfied = f.read()
             if is_satisfied != 'Yes':
                 print(1)

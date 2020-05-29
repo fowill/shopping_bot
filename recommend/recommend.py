@@ -1,8 +1,9 @@
 import pandas as pd 
 import numpy as np 
+import os
 
 def recommend(use,looking,price):
-	path = '/Users/fowillwly/Dev/shopping_bot/sources/laptops.xlsx'
+	path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/sources/laptops.xlsx'
 
 	df = pd.read_excel(path)
 	#use = {'use-media': 0.267878, 'use-business': 0.0920902, 'use-gaming': 0.644606, 'use-creator': 0.245646, 'use-all': 0.287746}

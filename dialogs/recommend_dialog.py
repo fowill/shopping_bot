@@ -20,6 +20,8 @@ import json
 import os.path
 import time
 
+import os
+
 class RecommendDialog(CancelAndHelpDialog):
     def __init__(self, dialog_id: str = None):
         super(RecommendDialog, self).__init__(dialog_id or RecommendDialog.__name__)
@@ -148,10 +150,10 @@ class RecommendDialog(CancelAndHelpDialog):
             pro_dict['looking'] = product_details.looking
             pro_dict['cost'] = product_details.cost
 
-            with open('/Users/fowillwly/Dev/shopping_bot/save/log.txt','a+') as f:
+            with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/log.txt','a+') as f:
                 f.write(str(recommend_id))
                 f.write('\n')
-            with open('/Users/fowillwly/Dev/shopping_bot/save/priceLog.txt','w+') as f:
+            with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/priceLog.txt','w+') as f:
                 f.write(str(product_details.cost))
 
             return await step_context.end_dialog(product_details)
@@ -161,13 +163,13 @@ class RecommendDialog(CancelAndHelpDialog):
     # Load attachment from file.
     def create_adaptive_card_attachment(self,id):
         relative_path = os.path.abspath(os.path.dirname(__file__))
-        path = os.path.join(relative_path, "../json/test.json")
-        img_path = '/Users/fowillwly/Dev/shopping_bot/sources/img/'+str(id+1)+'.png'
+        path = os.path.join(relative_path, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+"/json/test.json")
+        img_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/sources/img/'+str(id+1)+'.png'
         #print(img_path)
         with open(path) as in_file:
             card = json.load(in_file)
             card['body'][0]['url'] = img_path
-        with open('/Users/fowillwly/Dev/shopping_bot/sources/test.txt','w+') as f:
+        with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/sources/test.txt','w+') as f:
             f.write(str(card))
         #print(card)
         return Attachment(
