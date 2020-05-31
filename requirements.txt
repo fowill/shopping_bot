@@ -3,4 +3,7 @@ botbuilder-integration-aiohttp>=4.8.0
 botbuilder-dialogs>=4.8.0
 botbuilder-ai>=4.8.0
 datatypes-date-time>=1.0.0.a2
+baidu-aip
+pandas
+
 
