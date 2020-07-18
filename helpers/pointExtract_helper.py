@@ -9,7 +9,7 @@ def pointExtract(text1):
 
 	client = AipNlp(APP_ID, API_KEY, SECRET_KEY)
 
-	looking_ls = ["屏幕大","屏幕小","沉重傻大黑粗累背不动换个轻点的",'性能强一些','用不上性能轻薄些','太贵了，便宜些','太低端要贵一点的']
+	looking_ls = ["屏幕大","屏幕小","轻点",'性能强','性能差点轻薄些','便宜点','贵点']
 	name_ls = ["big-screen","small-screen","too-heavy","high-performance","low-performance","too-expensive","to-cheap"]
 
 
