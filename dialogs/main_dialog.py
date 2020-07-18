@@ -137,7 +137,7 @@ class MainDialog(ComponentDialog):
 
     async def final_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
 
-        #print(step_context.context.activity)
+        print(step_context.context.activity)
         details = step_context.context.activity.text
         ok = is_ok(details)
 
@@ -147,7 +147,6 @@ class MainDialog(ComponentDialog):
                 f.write('')
             return await step_context.replace_dialog(self.id, prompt_message)
         else:
-            #with open('/Users/fowillwly/Dev/shopping_bot/save/satisfied.txt','w+') as f:
             with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/satisfied.txt','w+') as f:
                 is_satisfied = f.read()
             if is_satisfied != 'Yes':

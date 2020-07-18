@@ -87,9 +87,7 @@ class AdjustDialog(CancelAndHelpDialog):
                 f.write('Yes')
             return
         else:
-            with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/satisfied.txt','w+') as f:
-                f.write('No')
-            return
+            return await step_context.replace_dialog(self.id)
 
         # Load attachment from file.
     def create_adaptive_card_attachment(self,id):
