@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np 
 import json
 import os
-
+import fileinput
 def adjust(score_dict):
 	path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/sources/laptops.xlsx'
 
@@ -13,7 +13,10 @@ def adjust(score_dict):
 		chosen_ls = f.readlines()
 
 
-	print(chosen_ls)
+	#print(chosen_ls)
+	with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/score.txt','r+') as f:
+		score_gotten = f.readline()
+	score_gotten = score_gotten.split(',')
 
 	with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/priceLog.txt','r+') as f:
 		price = eval(f.read())
@@ -26,7 +29,7 @@ def adjust(score_dict):
 	score_ls = []
 
 	for i in range(len(df.index)):
-	    score = 0
+	    score = float(score_gotten[i])
 	    if df.loc[i,'price']<price_low or df.loc[i,'price']>price_high or (str(i)+'\n') in chosen_ls:
 	        score = 0
 	    else:
@@ -34,8 +37,15 @@ def adjust(score_dict):
 	            score += score_dict[key]*df.loc[i,key]
 	    score_ls.append(score)
 
-	print(score_ls)
+	for line in fileinput.input(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/score.txt',inplace = 1):
+		if not fileinput.isfirstline():
+			print(line.replace('\n',''))
 
+	for i in range(len(score_ls)):
+		with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/score.txt','a+') as f:
+			f.write(str(score_ls[i]))
+			f.write("\n")
+	
 	index = 0
 	big = 0
 	for i in range(len(score_ls)):
@@ -43,6 +53,9 @@ def adjust(score_dict):
 	        index = i
 	        big = score_ls[i]
 
+	with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/log.txt','a+') as f:
+		f.write(str(index))
+		f.write("\n")
 	text = f"为您推荐{df.loc[index,'brand']}生产的{df.loc[index,'name']}, 内存为{df.loc[index,'ram']}g, 硬盘为{df.loc[index,'rom']}。cpu为{df.loc[index,'cpu-core']}核{df.loc[index,'cpu-type']}。屏幕为{df.loc[index,'screen-r1']}*{df.loc[index,'screen-r2']}。重量为{df.loc[index,'weight']}kg,续航为{df.loc[index,'battery']}小时，售价{df.loc[index,'price']}元。"
 
 	return (index,text)
