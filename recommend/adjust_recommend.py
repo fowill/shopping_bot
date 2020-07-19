@@ -44,7 +44,7 @@ def adjust(score_dict):
 	for i in range(len(score_ls)):
 		with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/score.txt','a+') as f:
 			f.write(str(score_ls[i]))
-			f.write("\n")
+			f.write(",")
 	
 	index = 0
 	big = 0
