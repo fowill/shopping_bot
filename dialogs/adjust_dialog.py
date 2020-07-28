@@ -54,9 +54,28 @@ class AdjustDialog(CancelAndHelpDialog):
     async def act_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
 
         details = step_context.context.activity.text
+        
+        #如果扩展数据库变成一个牌子多个电脑，将list改为dict即可
+        brand_list = ['苹果','微软','华为','联想','神舟','惠普','小米','荣耀',
+        '戴尔','华硕']
+        cpu_list = ['i5','i7','R5','R7','r5','r7']
+        brand_id = 0
+        cpu_id = 0
+
+        for i in range(len(brand_list)):
+            if brand_list[i] in details:
+                brand_id = i
+                break
+        if not brand_id:
+            for i in range(len(cpu_list)):
+                if cpu_list[i] in details:
+                    cpu_id = i
+                    break
+
+
         score_dict = pointExtract(details)
         #price = {'low':1,'high':20000}
-        recommend_id, recommend_result= adjust(score_dict)
+        recommend_id, recommend_result= adjust(score_dict,brand_id,cpu_id)
 
         welcome_card = self.create_adaptive_card_attachment(recommend_id)
         response = MessageFactory.attachment(welcome_card)
