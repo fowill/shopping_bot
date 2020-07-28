@@ -64,11 +64,15 @@ class AdjustDialog(CancelAndHelpDialog):
 
         for i in range(len(brand_list)):
             if brand_list[i] in details:
+                with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/brand.txt','w+') as f:
+                    f.write(brand_list[i])
                 brand_id = i
                 break
         if not brand_id:
             for i in range(len(cpu_list)):
                 if cpu_list[i] in details:
+                    with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/cpu.txt','w+') as f:
+                        f.write(cpu_list[i])
                     cpu_id = i
                     break
 
@@ -77,6 +81,12 @@ class AdjustDialog(CancelAndHelpDialog):
         #price = {'low':1,'high':20000}
         recommend_id, recommend_result= adjust(score_dict,brand_id,cpu_id)
 
+        with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/log.txt','r+') as f:
+            history = f.readlines()
+        last = int(history[-1])
+        if(last == recommend_id):
+            #print('一样！')
+            recommend_result = '抱歉，数据库中没有符合您需求的笔记本，故我们依旧为您推荐上一款笔记本' + recommend_result
         welcome_card = self.create_adaptive_card_attachment(recommend_id)
         response = MessageFactory.attachment(welcome_card)
         await step_context.context.send_activity(response)
