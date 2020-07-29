@@ -59,8 +59,8 @@ class AdjustDialog(CancelAndHelpDialog):
         brand_list = ['苹果','微软','华为','联想','神舟','惠普','小米','荣耀',
         '戴尔','华硕']
         cpu_list = ['i5','i7','R5','R7','r5','r7']
-        brand_id = 0
-        cpu_id = 0
+        brand_id = -1
+        cpu_id = -1
 
         for i in range(len(brand_list)):
             if brand_list[i] in details:
@@ -75,18 +75,16 @@ class AdjustDialog(CancelAndHelpDialog):
                         f.write(cpu_list[i])
                     cpu_id = i
                     break
-
+        print('brand_id = ')
+        print(brand_id)
+        print('cpu_id = ')
+        print(cpu_id)
 
         score_dict = pointExtract(details)
         #price = {'low':1,'high':20000}
         recommend_id, recommend_result= adjust(score_dict,brand_id,cpu_id)
-
-        with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/log.txt','r+') as f:
-            history = f.readlines()
-        last = int(history[-1])
-        if(last == recommend_id):
-            #print('一样！')
-            recommend_result = '抱歉，数据库中没有符合您需求的笔记本，故我们依旧为您推荐上一款笔记本' + recommend_result
+        print('推荐id为:')
+        print(recommend_id)
         welcome_card = self.create_adaptive_card_attachment(recommend_id)
         response = MessageFactory.attachment(welcome_card)
         await step_context.context.send_activity(response)
