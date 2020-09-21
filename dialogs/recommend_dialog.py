@@ -11,6 +11,8 @@ from .cancel_and_help_dialog import CancelAndHelpDialog
 from helpers.use_helper import use_cal
 from helpers.looking_helper import looking_cal
 from helpers.cost_helper import cost_cal
+from helpers.performance_helper import performance_cal
+from helpers.brand_helper import brand_cal
 from helpers.ok_helper import is_ok
 
 
@@ -32,9 +34,11 @@ class RecommendDialog(CancelAndHelpDialog):
             WaterfallDialog(
                 WaterfallDialog.__name__,
                 [
+                    self.brand_step,
                     self.use_step,
                     self.cost_step,
                     self.looking_step,
+                    self.performance_step,
                     self.confirm_step,
                     self.final_step,
                 ],
@@ -43,11 +47,26 @@ class RecommendDialog(CancelAndHelpDialog):
 
         self.initial_dialog_id = WaterfallDialog.__name__
 
-    async def use_step(
+    async def brand_step(
         self, step_context: WaterfallStepContext
     ) -> DialogTurnResult:
         product_details = step_context.options
 
+        if product_details.brand is None:
+            message_text = "您希望这台笔记本是什么品牌呢(请从华为、荣耀、苹果、微软、联想、神舟、惠普、小米、戴尔、华硕中选择一个或几个)？"
+            prompt_message = MessageFactory.text(
+                message_text, message_text, InputHints.expecting_input
+            )
+            return await step_context.prompt(
+                TextPrompt.__name__, PromptOptions(prompt=prompt_message)
+            )
+        return await step_context.next(product_details.brand)
+
+    async def use_step(
+        self, step_context: WaterfallStepContext
+    ) -> DialogTurnResult:
+        product_details = step_context.options
+        product_details.brand = brand_cal(step_context.result)
         if product_details.use is None:
             message_text = "您购买这台笔记本是用于什么用途呢？"
             prompt_message = MessageFactory.text(
@@ -62,18 +81,17 @@ class RecommendDialog(CancelAndHelpDialog):
         self, step_context: WaterfallStepContext
     ) -> DialogTurnResult:
         product_details = step_context.options
-
-        # Capture the response to the previous step's prompt
         product_details.use = use_cal(step_context.result)
+        if product_details.cost is None:
+            # Capture the response to the previous step's prompt
 
-        #if product_details.cost is None:
-        message_text = "您购买这台笔记本的预算大约是多少元呢？"
-        prompt_message = MessageFactory.text(
-            message_text, message_text, InputHints.expecting_input
-        )
-        return await step_context.prompt(
-            TextPrompt.__name__, PromptOptions(prompt=prompt_message)
-        )
+            message_text = "您购买这台笔记本的预算大约是多少元呢(请用xxx-xxx来回答)？"
+            prompt_message = MessageFactory.text(
+                message_text, message_text, InputHints.expecting_input
+            )
+            return await step_context.prompt(
+                TextPrompt.__name__, PromptOptions(prompt=prompt_message)
+            )
         return await step_context.next(product_details.cost)
 
 
@@ -86,7 +104,7 @@ class RecommendDialog(CancelAndHelpDialog):
         product_details.cost = cost_cal(step_context.result)
 
         if product_details.looking is None:
-            message_text = "您对电脑的外观有什么要求呢？"
+            message_text = "您对笔记本的外观有什么要求呢？"
             prompt_message = MessageFactory.text(
                 message_text, message_text, InputHints.expecting_input
             )
@@ -94,6 +112,24 @@ class RecommendDialog(CancelAndHelpDialog):
                 TextPrompt.__name__, PromptOptions(prompt=prompt_message)
             )
         return await step_context.next(product_details.looking)
+
+    async def performance_step(
+        self, step_context: WaterfallStepContext
+    ) -> DialogTurnResult:
+        product_details = step_context.options
+
+        # Capture the response to the previous step's prompt
+        product_details.looking = looking_cal(step_context.result)
+
+        if product_details.performance is None:
+            message_text = "您对笔记本的性能有什么要求呢（请从'高性能'和'一般'中挑选回答）？"
+            prompt_message = MessageFactory.text(
+                message_text, message_text, InputHints.expecting_input
+            )
+            return await step_context.prompt(
+                TextPrompt.__name__, PromptOptions(prompt=prompt_message)
+            )
+        return await step_context.next(product_details.performance)
 
     async def confirm_step(
         self, step_context: WaterfallStepContext
@@ -106,7 +142,7 @@ class RecommendDialog(CancelAndHelpDialog):
         product_details = step_context.options
 
         # Capture the results of the previous step
-        product_details.looking = looking_cal(step_context.result)
+        product_details.performance = performance_cal(step_context.result)
 
         message_text = (
             #f"请确认：您购买电脑是为了 { product_details.use } 用途。"
@@ -120,7 +156,7 @@ class RecommendDialog(CancelAndHelpDialog):
         )
         await step_context.context.send_activity(calculating_message)
 
-        return await step_context.next(product_details.looking)
+        return await step_context.next(product_details.performance)
 
 
     async def final_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
@@ -129,42 +165,44 @@ class RecommendDialog(CancelAndHelpDialog):
         :param step_context:
         :return DialogTurnResult:
         """
-        if step_context.result:
-            product_details = step_context.options
+        time.sleep(2)
+        #if step_context.result:
+        product_details = step_context.options
 
-            recommend_id, recommend_result = recommend(product_details.use,product_details.looking,product_details.cost)
+        print(product_details.use,product_details.looking,product_details.cost)
+        recommend_id, recommend_result = recommend(product_details.use,product_details.looking,product_details.cost)
 
 
-            welcome_card = self.create_adaptive_card_attachment(recommend_id)
-            response = MessageFactory.attachment(welcome_card)
-            await step_context.context.send_activity(response)
+        welcome_card = self.create_adaptive_card_attachment(recommend_id)
+        response = MessageFactory.attachment(welcome_card)
+        await step_context.context.send_activity(response)
 
-            message_text = str(recommend_result)
-            prompt_message = MessageFactory.text(
-                message_text, message_text, InputHints.ignoring_input
-            )    
-            await step_context.context.send_activity(prompt_message)
+        message_text = str(recommend_result)
+        prompt_message = MessageFactory.text(
+            message_text, message_text, InputHints.ignoring_input
+        )    
+        await step_context.context.send_activity(prompt_message)
 
-            pro_dict = {}
-            pro_dict['use'] = product_details.use
-            pro_dict['looking'] = product_details.looking
-            pro_dict['cost'] = product_details.cost
+        pro_dict = {}
+        pro_dict['use'] = product_details.use
+        pro_dict['looking'] = product_details.looking
+        pro_dict['cost'] = product_details.cost
 
-            with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/log.txt','a+') as f:
-                f.write(str(recommend_id))
-                f.write('\n')
-            with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/priceLog.txt','w+') as f:
-                f.write(str(product_details.cost))
+        with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/log.txt','a+') as f:
+            f.write(str(recommend_id))
+            f.write('\n')
+        with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/priceLog.txt','w+') as f:
+            f.write(str(product_details.cost))
 
-            return await step_context.end_dialog(product_details)
-        return await step_context.end_dialog()
+        return await step_context.end_dialog(product_details)
+        #return await step_context.end_dialog()
 
 
     # Load attachment from file.
     def create_adaptive_card_attachment(self,id):
         relative_path = os.path.abspath(os.path.dirname(__file__))
         path = os.path.join(relative_path, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+"/json/test.json")
-        img_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/sources/img/'+str(id+1)+'.png'
+        img_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/sources/img/'+str(id+1)+'.jpg'
         #print(img_path)
         with open(path) as in_file:
             card = json.load(in_file)

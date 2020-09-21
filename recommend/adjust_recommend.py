@@ -3,8 +3,8 @@ import numpy as np
 import json
 import os
 import fileinput
-def adjust(score_dict,brand_id,cpu_id):
-	path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/sources/laptops.xlsx'
+def adjust(score_dict):
+	path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/sources/laptops_extended.xlsx'
 	df = pd.read_excel(path)
 
 	with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/log.txt','r+') as f:
@@ -14,6 +14,9 @@ def adjust(score_dict,brand_id,cpu_id):
 	with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/score.txt','r+') as f:
 		lines = f.readlines()
 		last_line = lines[-1]
+
+	with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/cpu.txt','r+') as f:
+		cpu = f.readline()
 
 	score_gotten = last_line.split(',')
 	print("已有打分：")
@@ -30,17 +33,31 @@ def adjust(score_dict,brand_id,cpu_id):
 	#print(df.index)
 	score_ls = []
 	
-	for i in range(len(df.index)):
-	    score = float(score_gotten[i])
-	    if df.loc[i,'price']<price_low or df.loc[i,'price']>price_high or (str(i)+'\n') in chosen_ls:
-	        score = 0
-	    else:
-	        for key in list(score_dict.keys()):
-	            score += score_dict[key]*df.loc[i,key]
-	    score_ls.append(score)
+	if cpu == '':
+		for i in range(len(df.index)):
+			if score_gotten[i] == '0':
+				score_ls.append(score_gotten[i])
+				continue
+			score = float(score_gotten[i])
+			if df.loc[i,'price']<price_low or df.loc[i,'price']>price_high or (str(i)+'\n') in chosen_ls:
+				score = 0
+			else:
+				for key in list(score_dict.keys()):
+					score += score_dict[key]*df.loc[i,key]
+			score_ls.append(score)
+	else:
+		for i in range(len(df.index)):
+			if score_gotten[i] == '0':
+				score_ls.append(score_gotten[i])
+				continue
+			if df.loc[i,'cpu-abbr'] != cpu:
+				score_ls.append('0')
+				continue
+			else:
+				score_ls.append(score_gotten[i])
 	print('本此加分完各打分为：')
 	print(score_ls)
-	
+	'''
 	flag = 1
 	if(brand_id == -1 and cpu_id == -1):
 		flag = 0
@@ -72,13 +89,13 @@ def adjust(score_dict,brand_id,cpu_id):
 				f.write(str(brand_id))
 				f.write("\n")
 			return (brand_id,text)
-	'''
+
 	删除打分记录
 	for line in fileinput.input(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/score.txt',inplace = 1):
 		if not fileinput.isfirstline():
 			print(line.replace('\n',''))
 	'''
-	print('未指定品牌或cpu！')
+
 	for i in range(len(score_ls)):
 		with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/score.txt','a+') as f:
 			f.write(str(score_ls[i]))
@@ -87,14 +104,14 @@ def adjust(score_dict,brand_id,cpu_id):
 	index = 0
 	big = 0
 	for i in range(len(score_ls)):
-	    if score_ls[i]>big:
-	        index = i
-	        big = score_ls[i]
+		if float(score_ls[i]) > float(big):
+			index = i
+			big = score_ls[i]
 
 	with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/log.txt','a+') as f:
 		f.write(str(index))
 		f.write("\n")
-	text = f"为您推荐{df.loc[index,'brand']}生产的{df.loc[index,'name']}, 内存为{df.loc[index,'ram']}g, 硬盘为{df.loc[index,'rom']}。cpu为{df.loc[index,'cpu-core']}核{df.loc[index,'cpu-type']}。屏幕为{df.loc[index,'screen-r1']}*{df.loc[index,'screen-r2']}。重量为{df.loc[index,'weight']}kg,续航为{df.loc[index,'battery']}小时，售价{df.loc[index,'price']}元。"
+	text = f"为您推荐{df.loc[index,'brand']}生产的{df.loc[index,'name']}, 内存为{df.loc[index,'rom']}G, ,cpu为{df.loc[index,'cpu-core']}核{df.loc[index,'cpu-type']}。屏幕为{df.loc[index,'screen-r1']}*{df.loc[index,'screen-r2']}。重量为{df.loc[index,'weight']}kg,售价{df.loc[index,'price']}元。"
 
 	return (index,text)
 

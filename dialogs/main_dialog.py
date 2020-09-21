@@ -142,9 +142,19 @@ class MainDialog(ComponentDialog):
         ok = is_ok(details)
 
         if ok:
-            prompt_message = "好的，我还能帮到什么吗？"    
+            prompt_message = "欢迎您下次继续使用！"    
             with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/log.txt','w+') as f:
                 f.write('')
+            path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/save"
+            for i in os.listdir(path):
+                path_file = os.path.join(path,i)
+                if os.path.isfile(path_file):
+                    os.remove(path_file)
+                else:
+                    for f in os.listdir(path_file):
+                        path_file2 =os.path.join(path_file,f)
+                        if os.path.isfile(path_file2):
+                            os.remove(path_file2)
             return await step_context.replace_dialog(self.id, prompt_message)
         else:
             with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/satisfied.txt','w+') as f:

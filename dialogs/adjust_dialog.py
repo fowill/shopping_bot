@@ -40,7 +40,7 @@ class AdjustDialog(CancelAndHelpDialog):
 
     async def ask_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
 
-        message_text = ("请说调整建议")
+        message_text = ("请说一条调整建议")
 
         prompt_message = MessageFactory.text(
             message_text, message_text, InputHints.expecting_input
@@ -54,37 +54,12 @@ class AdjustDialog(CancelAndHelpDialog):
     async def act_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
 
         details = step_context.context.activity.text
-        
-        #如果扩展数据库变成一个牌子多个电脑，将list改为dict即可
-        brand_list = ['苹果','微软','华为','联想','神舟','惠普','小米','荣耀',
-        '戴尔','华硕']
-        cpu_list = ['i5','i7','R5','R7','r5','r7']
-        brand_id = -1
-        cpu_id = -1
-
-        for i in range(len(brand_list)):
-            if brand_list[i] in details:
-                with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/brand.txt','w+') as f:
-                    f.write(brand_list[i])
-                brand_id = i
-                break
-        if not brand_id:
-            for i in range(len(cpu_list)):
-                if cpu_list[i] in details:
-                    with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/cpu.txt','w+') as f:
-                        f.write(cpu_list[i])
-                    cpu_id = i
-                    break
-        print('brand_id = ')
-        print(brand_id)
-        print('cpu_id = ')
-        print(cpu_id)
 
         score_dict = pointExtract(details)
         #price = {'low':1,'high':20000}
-        recommend_id, recommend_result= adjust(score_dict,brand_id,cpu_id)
+        recommend_id, recommend_result= adjust(score_dict)
         print('推荐id为:')
-        print(recommend_id)
+        print(str(recommend_id+1))
         welcome_card = self.create_adaptive_card_attachment(recommend_id)
         response = MessageFactory.attachment(welcome_card)
         await step_context.context.send_activity(response)
@@ -112,6 +87,18 @@ class AdjustDialog(CancelAndHelpDialog):
         if ok:
             with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/satisfied.txt','w+') as f:
                 f.write('Yes')
+            with open(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/save/log.txt','w+') as f:
+                f.write('')
+            path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/save'
+            for i in os.listdir(path):
+                path_file = os.path.join(path,i)
+                if os.path.isfile(path_file):
+                    os.remove(path_file)
+                else:
+                    for f in os.listdir(path_file):
+                        path_file2 =os.path.join(path_file,f)
+                        if os.path.isfile(path_file2):
+                            os.remove(path_file2)
             return
         else:
             return await step_context.replace_dialog(self.id)
@@ -120,7 +107,7 @@ class AdjustDialog(CancelAndHelpDialog):
     def create_adaptive_card_attachment(self,id):
         relative_path = os.path.abspath(os.path.dirname(__file__))
         path = os.path.join(relative_path, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+"/json/test.json")
-        img_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/sources/img/'+str(id+1)+'.png'
+        img_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/sources/img/'+str(id+1)+'.jpg'
         #print(img_path)
         with open(path) as in_file:
             card = json.load(in_file)
