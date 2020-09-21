@@ -8,5 +8,6 @@ class ProductDetails:
         self.cost = None
         self.brand = None
         self.looking = None
+        self.performance = None
         self.ok = None
         self.unsupported_things = []
